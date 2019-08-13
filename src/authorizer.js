@@ -10,7 +10,7 @@
  * @returns {Object} object - API Gateway Lambda Proxy Output Format
  *
  */
-exports.lambdaHandler = async (event, context) => {
+exports.handler = async (event, context) => {
   try {
     let token = event.authorizationToken;
     console.log(`Token: ${token}`);
