@@ -9,8 +9,6 @@ Description: >
 Globals:
   Function:
     Timeout: 3
-  # Api:
-  #   OpenApiVersion: '2.0'
 
 Parameters:
   DomainName:
@@ -50,6 +48,12 @@ Resources:
   ServerlessRestAPI:
     Type: AWS::Serverless::Api
     Properties:
+      Auth:
+        DefaultAuthorizer: LambdaRequestAuthorizer 
+        Authorizers:
+        MyLambdaTokenAuth:
+          FunctionPayloadType: TOKEN # OPTIONAL; Defaults to 'TOKEN' when `FunctionArn` is specified
+          FunctionArn: !GetAtt CustomAuthorizerFunction.Arn
       StageName: dev
       EndpointConfiguration: REGIONAL
       DefinitionBody:
