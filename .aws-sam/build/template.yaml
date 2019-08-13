@@ -1,0 +1,101 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'api-gateway-test
+
+  Sample SAM Template for api-gateway-test
+
+  '
+Globals:
+  Function:
+    Timeout: 3
+Parameters:
+  ApiBasePath:
+    Default: v1
+    Description: Base path of the api. 'v1' - example.co.uk/v1/endpoints
+    Type: String
+  DomainName:
+    Default: api.esource.roweitdev.co.uk
+    Description: Domain name to call the api from.
+    Type: String
+  HostedZoneName:
+    Default: esource.roweitdev.co.uk.
+    Description: Name of the desired hosted zone.
+    Type: String
+  SSMCertificateArn:
+    Default: /esource/config/ESOURCE_api_certificate_arn
+    Description: Arn of the esource certificate created via terraform.
+    Type: AWS::SSM::Parameter::Value<String>
+Resources:
+  APIBasePathMapping:
+    DependsOn: ServerlessRestAPIdevStage
+    Properties:
+      BasePath:
+        Ref: ApiBasePath
+      DomainName:
+        Ref: GatewayDomain
+      RestApiId:
+        Ref: ServerlessRestAPI
+      Stage: dev
+    Type: AWS::ApiGateway::BasePathMapping
+  APIDomain:
+    Properties:
+      HostedZoneName:
+        Ref: HostedZoneName
+      RecordSets:
+      - AliasTarget:
+          DNSName:
+            Fn::GetAtt:
+            - GatewayDomain
+            - RegionalDomainName
+          HostedZoneId:
+            Fn::GetAtt:
+            - GatewayDomain
+            - RegionalHostedZoneId
+        Name:
+          Ref: DomainName
+        Type: A
+    Type: AWS::Route53::RecordSetGroup
+  CustomAuthorizerFunction:
+    Properties:
+      CodeUri: CustomAuthorizerFunction
+      Handler: authorizer.handler
+      Role:
+        Fn::Sub: ${CustomAuthorizerFunctionRole.Arn}
+      Runtime: nodejs10.x
+    Type: AWS::Serverless::Function
+  GatewayDomain:
+    Properties:
+      DomainName:
+        Ref: DomainName
+      EndpointConfiguration:
+        Types:
+        - REGIONAL
+      RegionalCertificateArn:
+        Ref: SSMCertificateArn
+    Type: AWS::ApiGateway::DomainName
+  GetUsersFunction:
+    Properties:
+      CodeUri: GetUsersFunction
+      Handler: app.lambdaHandler
+      Runtime: nodejs10.x
+    Type: AWS::Serverless::Function
+  GetUsersLambdaPermission:
+    DependsOn:
+    - ServerlessRestAPI
+    - GetUsersFunction
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName:
+        Ref: GetUsersFunction
+      Principal: apigateway.amazonaws.com
+    Type: AWS::Lambda::Permission
+  ServerlessRestAPI:
+    Properties:
+      DefinitionBody:
+        Fn::Transform:
+          Name: AWS::Include
+          Parameters:
+            Location: ..\..\swagger.yaml
+      EndpointConfiguration: REGIONAL
+      StageName: dev
+    Type: AWS::Serverless::Api
+Transform: AWS::Serverless-2016-10-31
