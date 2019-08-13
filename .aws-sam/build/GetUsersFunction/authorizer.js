@@ -1,7 +1,3 @@
-// const axios = require('axios')
-// const url = 'http://checkip.amazonaws.com/';
-let response;
-
 /**
  *
  * Event doc: https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html#api-gateway-simple-proxy-for-lambda-input-format
@@ -17,8 +13,11 @@ let response;
 exports.lambdaHandler = async (event, context) => {
   try {
     let token = event.authorizationToken;
+    console.log(`Token: ${token}`);
+    console.log(`Event: ${event}`);
 
-    return generatePolicy();
+    if (token) return generatePolicy(1, 'Allow', event.methodArn);
+    else return generatePolicy(1, 'Deny', event.methodArn);
   } catch (err) {
     const response = {
       statusCode: 401,
@@ -37,11 +36,11 @@ exports.lambdaHandler = async (event, context) => {
 };
 
 // Help function to generate an IAM policy
-const generatePolicy = async (principalId, effect, resource) => {
+const generatePolicy = async (principalId, effect, methodArn) => {
   let authResponse = {};
 
   authResponse.principalId = principalId;
-  if (effect && resource) {
+  if (effect && methodArn) {
     let policyDocument = {};
     policyDocument.Version = '2012-10-17';
     policyDocument.Statement = [

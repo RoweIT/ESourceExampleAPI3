@@ -9,8 +9,8 @@ Description: >
 Globals:
   Function:
     Timeout: 3
-  Api:
-    OpenApiVersion: '2.0'
+  # Api:
+  #   OpenApiVersion: '2.0'
 
 Parameters:
   DomainName:
