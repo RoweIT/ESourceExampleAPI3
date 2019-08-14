@@ -1,15 +1,8 @@
 version: 0.2
 phases:
   pre_build:
-      commands:
-        - cd src
-        - npm install
-  install:
-    runtime-versions:
-      nodejs: 10
     commands:
-      # - npm run test
-      - cd ..
+      - npm install
   post_build:
     commands:
       - aws cloudformation package --template-file template.yaml --s3-bucket $S3_BUCKET --output-template-file deploy.yaml
