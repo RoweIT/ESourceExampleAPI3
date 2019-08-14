@@ -20,6 +20,11 @@ Parameters:
     Default: esource.roweitdev.co.uk.
     Description: Name of the desired hosted zone.
     Type: String
+  SSMCertificateArn:
+    Description: 'Arn of the esource certificate created via terraform.'
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: '/esource/config/ESOURCE_api_certificate_arn'
+
 Resources:
   ApiGatewayAuthorizerRole:
     Properties:
@@ -44,6 +49,7 @@ Resources:
           Version: '2012-10-17'
         PolicyName: InvokeAuthorizerFunction
     Type: AWS::IAM::Role
+
   CustomAuthorizerFunction:
     Properties:
       CodeUri: s3://adam.sam-template-artifacts/e9ca84904ce18f5ccdb1148670836e4d
@@ -52,6 +58,7 @@ Resources:
         Fn::Sub: ${CustomAuthorizerFunctionRole.Arn}
       Runtime: nodejs10.x
     Type: AWS::Serverless::Function
+
   CustomAuthorizerFunctionRole:
     Properties:
       AssumeRolePolicyDocument:
@@ -66,12 +73,14 @@ Resources:
       ManagedPolicyArns:
       - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
     Type: AWS::IAM::Role
+
   GetUsersFunction:
     Properties:
       CodeUri: s3://adam.sam-template-artifacts/17ef2b9bb7d9db489d63a28ecaebc5ad
       Handler: app.lambdaHandler
       Runtime: nodejs10.x
     Type: AWS::Serverless::Function
+
   GetUsersLambdaPermission:
     DependsOn:
     - ServerlessRestAPI
@@ -82,11 +91,41 @@ Resources:
         Ref: GetUsersFunction
       Principal: apigateway.amazonaws.com
     Type: AWS::Lambda::Permission
+
   ServerlessRestAPI:
+    Type: AWS::Serverless::Api
     Properties:
       DefinitionBody:
         'Fn::Transform':
           Name: 'AWS::Include'
           Parameters:
             Location: './openapi3.yaml'
+    
+  GatewayDomain:
+    Type: AWS::ApiGateway::DomainName
+    Properties:
+      RegionalCertificateArn: !Ref SSMCertificateArn
+      DomainName: !Ref DomainName
+      EndpointConfiguration:
+        Types: [REGIONAL]
+
+  APIBasePathMapping:
+    DependsOn: ServerlessRestAPIdevStage #Required - Needs to wait for SAM to create stage before mapping {LOGICAL_API_NAME}{Stage}Stage
+    Type: AWS::ApiGateway::BasePathMapping
+    Properties:
+      DomainName: !Ref GatewayDomain
+      RestApiId: !Ref ServerlessRestAPI
+      Stage: dev
+      BasePath: !Ref ApiBasePath
+
+  APIDomain:
+    Type: AWS::Route53::RecordSetGroup
+    Properties:
+      HostedZoneName: !Ref HostedZoneName
+      RecordSets:
+      - Name: !Ref DomainName
+        Type: A
+        AliasTarget:
+          DNSName: !GetAtt GatewayDomain.RegionalDomainName
+          HostedZoneId: !GetAtt GatewayDomain.RegionalHostedZoneId
         
