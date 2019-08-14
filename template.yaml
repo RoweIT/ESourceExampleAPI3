@@ -8,7 +8,7 @@ Description: 'api-gateway-test
 Globals:
   Api:
     OpenApiVersion: '3.0.1'
-    
+
 Parameters:
   ApiBasePath:
     Default: v1
@@ -54,7 +54,7 @@ Resources:
 
   CustomAuthorizerFunction:
     Properties:
-      CodeUri: s3://adam.sam-template-artifacts/e9ca84904ce18f5ccdb1148670836e4d
+      CodeUri: /src
       Handler: authorizer.handler
       Role:
         Fn::Sub: ${CustomAuthorizerFunctionRole.Arn}
@@ -62,41 +62,43 @@ Resources:
     Type: AWS::Serverless::Function
 
   CustomAuthorizerFunctionRole:
-    Properties:
-      AssumeRolePolicyDocument:
-        Statement:
-        - Action:
-          - sts:AssumeRole
-          Effect: Allow
-          Principal:
-            Service:
-            - lambda.amazonaws.com
-        Version: '2012-10-17'
-      ManagedPolicyArns:
-      - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
     Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument: 
+        Version: "2012-10-17"
+        Statement: 
+          - 
+            Effect: "Allow"
+            Principal: 
+              Service: 
+                - "lambda.amazonaws.com"
+            Action: 
+              - sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
 
   GetUsersFunction:
     Properties:
-      CodeUri: s3://adam.sam-template-artifacts/17ef2b9bb7d9db489d63a28ecaebc5ad
+      CodeUri: src/
       Handler: app.lambdaHandler
       Runtime: nodejs10.x
     Type: AWS::Serverless::Function
 
   GetUsersLambdaPermission:
+    Type: AWS::Lambda::Permission
     DependsOn:
     - ServerlessRestAPI
     - GetUsersFunction
     Properties:
       Action: lambda:InvokeFunction
-      FunctionName:
-        Ref: GetUsersFunction
+      FunctionName: !Ref GetUsersFunction
       Principal: apigateway.amazonaws.com
-    Type: AWS::Lambda::Permission
 
   ServerlessRestAPI:
     Type: AWS::Serverless::Api
     Properties:
+      StageName: dev
+      EndpointConfiguration: REGIONAL
       DefinitionBody:
         'Fn::Transform':
           Name: 'AWS::Include'
