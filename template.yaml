@@ -1,4 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
 Description: 'api-gateway-test
 
   Sample SAM Template for api-gateway-test
@@ -7,6 +8,7 @@ Description: 'api-gateway-test
 Globals:
   Api:
     OpenApiVersion: '3.0.1'
+    
 Parameters:
   ApiBasePath:
     Default: v1
