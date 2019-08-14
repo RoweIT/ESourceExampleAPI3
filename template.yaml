@@ -54,7 +54,7 @@ Resources:
 
   CustomAuthorizerFunction:
     Properties:
-      CodeUri: /src
+      CodeUri: src/
       Handler: authorizer.handler
       Role:
         Fn::Sub: ${CustomAuthorizerFunctionRole.Arn}
