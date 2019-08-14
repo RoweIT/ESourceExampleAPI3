@@ -5,8 +5,8 @@ Description: 'api-gateway-test
 
   '
 Globals:
-  Function:
-    Timeout: 3
+  Api:
+    OpenApiVersion: '3.0.1'
 Parameters:
   ApiBasePath:
     Default: v1
@@ -20,40 +20,7 @@ Parameters:
     Default: esource.roweitdev.co.uk.
     Description: Name of the desired hosted zone.
     Type: String
-  SSMCertificateArn:
-    Default: /esource/config/ESOURCE_api_certificate_arn
-    Description: Arn of the esource certificate created via terraform.
-    Type: AWS::SSM::Parameter::Value<String>
 Resources:
-  APIBasePathMapping:
-    DependsOn: ServerlessRestAPIdevStage
-    Properties:
-      BasePath:
-        Ref: ApiBasePath
-      DomainName:
-        Ref: GatewayDomain
-      RestApiId:
-        Ref: ServerlessRestAPI
-      Stage: dev
-    Type: AWS::ApiGateway::BasePathMapping
-  APIDomain:
-    Properties:
-      HostedZoneName:
-        Ref: HostedZoneName
-      RecordSets:
-      - AliasTarget:
-          DNSName:
-            Fn::GetAtt:
-            - GatewayDomain
-            - RegionalDomainName
-          HostedZoneId:
-            Fn::GetAtt:
-            - GatewayDomain
-            - RegionalHostedZoneId
-        Name:
-          Ref: DomainName
-        Type: A
-    Type: AWS::Route53::RecordSetGroup
   ApiGatewayAuthorizerRole:
     Properties:
       AssumeRolePolicyDocument:
@@ -99,16 +66,6 @@ Resources:
       ManagedPolicyArns:
       - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
     Type: AWS::IAM::Role
-  GatewayDomain:
-    Properties:
-      DomainName:
-        Ref: DomainName
-      EndpointConfiguration:
-        Types:
-        - REGIONAL
-      RegionalCertificateArn:
-        Ref: SSMCertificateArn
-    Type: AWS::ApiGateway::DomainName
   GetUsersFunction:
     Properties:
       CodeUri: GetUsersFunction
@@ -127,11 +84,101 @@ Resources:
     Type: AWS::Lambda::Permission
   ServerlessRestAPI:
     Properties:
+      Auth:
+        Authorizers:
+          LambdaTokenAuthorizer:
+            FunctionArn:
+              Fn::GetAtt:
+              - CustomAuthorizerFunction
+              - Arn
+            FunctionInvokeRole:
+              Fn::GetAtt:
+              - CustomAuthorizerFunctionRole
+              - Arn
+            FunctionPayloadType: TOKEN
+            Identity:
+              Headers:
+              - Authorization
+              ReauthorizeEvery: 300
+        DefaultAuthorizer: LambdaTokenAuthorizer
       DefinitionBody:
-        Fn::Transform:
-          Name: AWS::Include
-          Parameters:
-            Location: ..\..\swagger.yaml
+        definitions:
+          User:
+            description: A generic user
+            properties:
+              id:
+                description: ID of the user
+                type: number
+              name:
+                description: Name of the user
+                type: string
+            required:
+            - tip
+            type: object
+        info:
+          title: 'ESOURCE Sample Response API #3 (Authorized)'
+          version: '0.1'
+        paths:
+          /users:
+            get:
+              description: Gets full list of users
+              produces:
+              - application/json
+              responses:
+                '200':
+                  description: The request was successful.
+                  schema:
+                    items:
+                      $ref: '#/definitions/User'
+                    type: array
+              security:
+              - CustomAuthorizer: []
+              x-amazon-apigateway-integration:
+                httpMethod: POST
+                passthroughBehavior: when_no_match
+                type: aws_proxy
+                uri:
+                  Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GetUsersFunction.Arn}/invocations
+          /users/{id}:
+            get:
+              description: Gets a specific user
+              parameters:
+              - in: path
+                name: id
+                required: true
+                type: string
+              produces:
+              - application/json
+              responses:
+                '200':
+                  description: The request was successful.
+                  schema:
+                    items:
+                      $ref: '#/definitions/User'
+              security:
+              - CustomAuthorizer: []
+              x-amazon-apigateway-integration:
+                httpMethod: POST
+                passthroughBehavior: when_no_match
+                type: aws_proxy
+                uri:
+                  Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GetUsersFunction.Arn}/invocations
+        schemes:
+        - https
+        securityDefinitions:
+          CustomAuthorizer:
+            in: header
+            name: Authorization
+            type: apiKey
+            x-amazon-apigateway-authorizer:
+              authorizerCredentials:
+                Fn::Sub: ${ApiGatewayAuthorizerRole.Arn}
+              authorizerResultTtlInSeconds: 60
+              authorizerUri:
+                Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CustomAuthorizerFunction.Arn}/invocations
+              type: token
+            x-amazon-apigateway-authtype: custom
+        swagger: '2.0'
       EndpointConfiguration: REGIONAL
       StageName: dev
     Type: AWS::Serverless::Api

@@ -7,6 +7,8 @@ schemes:
 paths:
   /users:
     get:
+      security:
+        - CustomAuthorizer: []
       description: Gets full list of users
       produces:
         - application/json
@@ -23,11 +25,11 @@ paths:
         passthroughBehavior: when_no_match
         httpMethod: POST
         type: aws_proxy
-    security:
-        - CustomAuthorizer: []
 
-  '/users/{id}':
+  /users/{id}:
     get:
+      security:
+        - CustomAuthorizer: []
       description: Gets a specific user
       produces:
         - application/json
@@ -48,8 +50,6 @@ paths:
         passthroughBehavior: when_no_match
         httpMethod: POST
         type: aws_proxy
-    security:
-        - CustomAuthorizer: []
         
 definitions:
   User:
