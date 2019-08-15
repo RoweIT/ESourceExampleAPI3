@@ -84,13 +84,6 @@ Resources:
       Runtime: nodejs10.x
     Type: AWS::Serverless::Function
 
-  GetUserFunction:
-    Properties:
-      CodeUri: src/
-      Handler: app.getUser
-      Runtime: nodejs10.x
-    Type: AWS::Serverless::Function
-
   GetUsersLambdaPermission:
     Type: AWS::Lambda::Permission
     DependsOn:
@@ -98,9 +91,24 @@ Resources:
     - GetUsersFunction
     Properties:
       Action: lambda:InvokeFunction
-      FunctionName: 
-        - !Ref GetUsersFunction
-        - !Ref GetUserFunction
+      FunctionName: !Ref GetUsersFunction
+      Principal: apigateway.amazonaws.com
+
+  GetUserFunction:
+    Properties:
+      CodeUri: src/
+      Handler: app.getUser
+      Runtime: nodejs10.x
+    Type: AWS::Serverless::Function
+
+  GetUserLambdaPermission:
+    Type: AWS::Lambda::Permission
+    DependsOn:
+    - ServerlessRestAPI
+    - GetUserFunction
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref GetUserFunction
       Principal: apigateway.amazonaws.com
 
   ServerlessRestAPI:
