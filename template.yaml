@@ -98,7 +98,9 @@ Resources:
     - GetUsersFunction
     Properties:
       Action: lambda:InvokeFunction
-      FunctionName: !Ref GetUsersFunction
+      FunctionName: 
+        - !Ref GetUsersFunction
+        - !Ref GetUserFunction
       Principal: apigateway.amazonaws.com
 
   ServerlessRestAPI:
