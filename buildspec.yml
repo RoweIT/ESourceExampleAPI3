@@ -4,8 +4,6 @@ phases:
     runtime-versions:
       nodejs: 10
   build:
-    runtime-versions:
-      nodejs: 10
     commands:
       - npm install
   post_build:
