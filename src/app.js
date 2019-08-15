@@ -37,16 +37,15 @@ let users = [
  * @returns {Object} object - API Gateway Lambda Proxy Output Format
  *
  */
+
+let responseBody = {
+  apiVersion: 1
+};
+
 exports.getAllUsers = async (event, context) => {
   try {
     console.log('Received event:', JSON.stringify(event, null, 2));
-    let responseBody;
-
-    if (event.pathParameters && event.pathParameters.id) {
-      responseBody = getUser(parseInt(event.pathParameters.id));
-    } else {
-      responseBody = getAllUsers();
-    }
+    responseBody.users = getAllUsers();
 
     return {
       statusCode: 200,
@@ -71,7 +70,7 @@ exports.getAllUsers = async (event, context) => {
 exports.getUser = async (event, context) => {
   try {
     console.log('Received event:', JSON.stringify(event, null, 2));
-    let responseBody = getUser(parseInt(event.pathParameters.id));
+    responseBody.user = getUser(parseInt(event.pathParameters.id));
 
     return {
       statusCode: 200,
