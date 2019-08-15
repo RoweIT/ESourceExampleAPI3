@@ -37,7 +37,7 @@ let users = [
  * @returns {Object} object - API Gateway Lambda Proxy Output Format
  *
  */
-exports.lambdaHandler = async (event, context) => {
+exports.getAllUsers = async (event, context) => {
   try {
     console.log('Received event:', JSON.stringify(event, null, 2));
     let responseBody;
@@ -47,6 +47,31 @@ exports.lambdaHandler = async (event, context) => {
     } else {
       responseBody = getAllUsers();
     }
+
+    return {
+      statusCode: 200,
+      body: JSON.stringify(responseBody),
+      headers: {
+        'Access-Control-Allow-Origin': '*'
+      }
+    };
+  } catch (err) {
+    return {
+      statusCode: 401,
+      body: {
+        message: err.message
+      },
+      headers: {
+        'Access-Control-Allow-Origin': '*'
+      }
+    };
+  }
+};
+
+exports.getUser = async (event, context) => {
+  try {
+    console.log('Received event:', JSON.stringify(event, null, 2));
+    let responseBody = getUser(parseInt(event.pathParameters.id));
 
     return {
       statusCode: 200,

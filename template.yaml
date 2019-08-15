@@ -80,7 +80,14 @@ Resources:
   GetUsersFunction:
     Properties:
       CodeUri: src/
-      Handler: app.lambdaHandler
+      Handler: app.getAllUsers
+      Runtime: nodejs10.x
+    Type: AWS::Serverless::Function
+
+  GetUserFunction:
+    Properties:
+      CodeUri: src/
+      Handler: app.getUser
       Runtime: nodejs10.x
     Type: AWS::Serverless::Function
 
