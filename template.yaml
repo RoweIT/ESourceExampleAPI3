@@ -52,31 +52,6 @@ Resources:
         PolicyName: InvokeAuthorizerFunction
     Type: AWS::IAM::Role
 
-  CustomAuthorizerFunction:
-    Properties:
-      CodeUri: src/
-      Handler: authorizer.handler
-      Role:
-        Fn::Sub: ${CustomAuthorizerFunctionRole.Arn}
-      Runtime: nodejs10.x
-    Type: AWS::Serverless::Function
-
-  CustomAuthorizerFunctionRole:
-    Type: AWS::IAM::Role
-    Properties:
-      AssumeRolePolicyDocument: 
-        Version: "2012-10-17"
-        Statement: 
-          - 
-            Effect: "Allow"
-            Principal: 
-              Service: 
-                - "lambda.amazonaws.com"
-            Action: 
-              - sts:AssumeRole
-      ManagedPolicyArns:
-        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
-
   GetUsersFunction:
     Properties:
       CodeUri: src/
