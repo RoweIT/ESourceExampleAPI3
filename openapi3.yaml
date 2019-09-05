@@ -1,6 +1,6 @@
 openapi: "3.0.1"
 info:
-  title: "ESOURCE Sample Response API #3 (Authorized)"
+  title: "ESOURCE Sample Response API #3 (Not Authorized)"
   version: "0.1"
 paths:
   /users:
@@ -56,16 +56,3 @@ components:
       type: "array"
       items:
         $ref: "#/components/schemas/User"
-  securitySchemes:
-    CustomAuthorizer:
-      type: "apiKey"
-      name: "Authorization"
-      in: "header"
-      x-amazon-apigateway-authtype: "custom"
-      x-amazon-apigateway-authorizer:
-        authorizerUri: 
-          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CustomAuthorizerFunction.Arn}/invocations
-        authorizerCredentials: 
-          Fn::Sub: ${ApiGatewayAuthorizerRole.Arn}
-        authorizerResultTtlInSeconds: 60
-        type: "token"
