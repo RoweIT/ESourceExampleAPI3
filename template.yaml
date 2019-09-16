@@ -75,8 +75,9 @@ Resources:
 
   APIBasePathMapping:
     Type: AWS::ApiGateway::BasePathMapping
+    DependsOn: ServerlessRestAPIdevStage
     Properties:
       DomainName: !Ref DomainName
       RestApiId: !Ref ServerlessRestAPI
-      Stage: ServerlessRestAPI.Stage
+      Stage: dev
       BasePath: !Ref ApiBasePath
