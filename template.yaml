@@ -78,5 +78,5 @@ Resources:
     Properties:
       DomainName: !Ref DomainName
       RestApiId: !Ref ServerlessRestAPI
-      Stage: dev
+      Stage: ServerlessRestAPI.Stage
       BasePath: !Ref ApiBasePath
