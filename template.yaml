@@ -10,22 +10,14 @@ Globals:
     OpenApiVersion: '3.0.1'
 
 Parameters:
-  ApiBasePath:
-    Default: v1
-    Description: Base path of the api. 'v1' - example.co.uk/v1/endpoints
+  MajorVersion:
+    Default: "1"
+    Description: Minor version of the API
     Type: String
-  DomainName:
-    Default: api.esource.roweitdev.co.uk
-    Description: Domain name to call the api from.
+  MinorVersion:
+    Default: "2"
+    Description: Minor version of the API
     Type: String
-  HostedZoneName:
-    Default: esource.roweitdev.co.uk.
-    Description: Name of the desired hosted zone.
-    Type: String
-  SSMCertificateArn:
-    Description: 'Arn of the esource certificate created via terraform.'
-    Type: AWS::SSM::Parameter::Value<String>
-    Default: '/esource/config/ESOURCE_api_certificate_arn'
 
 Resources:
   GetUsersFunction:
@@ -65,19 +57,14 @@ Resources:
   ServerlessRestAPI:
     Type: AWS::Serverless::Api
     Properties:
-      StageName: dev
+      StageName: default
       EndpointConfiguration: REGIONAL
       DefinitionBody:
         'Fn::Transform':
           Name: 'AWS::Include'
           Parameters:
             Location: './openapi3.yaml'
-
-  APIBasePathMapping:
-    DependsOn: ServerlessRestAPIdevStage #Required - Needs to wait for SAM to create stage before mapping {LOGICAL_API_NAME}{Stage}Stage
-    Type: AWS::ApiGateway::BasePathMapping
-    Properties:
-      DomainName: !Ref DomainName
-      RestApiId: !Ref ServerlessRestAPI
-      Stage: dev
-      BasePath: !Ref ApiBasePath
+      Tags:
+          Application: ESOURCE_API
+          MAJOR_VERSION: !Ref MajorVersion
+          MINOR_VERSION: !Ref MinorVersion
