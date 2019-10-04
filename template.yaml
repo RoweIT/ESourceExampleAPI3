@@ -11,11 +11,11 @@ Globals:
 
 Parameters:
   MajorVersion:
-    Default: "1"
+    Default: "2"
     Description: Minor version of the API
     Type: String
   MinorVersion:
-    Default: "2"
+    Default: "1"
     Description: Minor version of the API
     Type: String
 
