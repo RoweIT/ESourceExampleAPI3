@@ -39,7 +39,7 @@ let users = [
  */
 
 let responseBody = {
-  apiVersion: 1
+  apiVersion: 2.1
 };
 
 exports.getAllUsers = async (event, context) => {
