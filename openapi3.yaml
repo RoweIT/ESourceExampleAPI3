@@ -48,7 +48,7 @@ paths:
         httpMethod: "POST"
         type: "aws_proxy"
       security:
-        - basicAuth: []
+        - CustomAuthorizer: []
   /tenders/status:
     get:
       tags:
@@ -73,7 +73,7 @@ paths:
         httpMethod: "POST"
         type: "aws_proxy"
       security:
-        - basicAuth: []
+        - CustomAuthorizer: []
   '/tenders/{id}':
     get:
       tags:
@@ -114,7 +114,7 @@ paths:
         httpMethod: "POST"
         type: "aws_proxy"
       security:
-        - basicAuth: []
+        - CustomAuthorizer: []
     delete:
       tags:
         - tender
@@ -144,7 +144,7 @@ paths:
         httpMethod: "POST"
         type: "aws_proxy"
       security:
-        - basicAuth: []
+        - CustomAuthorizer: []
   
 components:
   schemas:
@@ -266,9 +266,18 @@ components:
         message:
           type: string
   securitySchemes:
-    basicAuth:
-        type: http
-        scheme: basic
+    CustomAuthorizer:
+        type: "basic"
+        name: "Authorization"
+        in: "header"
+        x-amazon-apigateway-authtype: "custom"
+        x-amazon-apigateway-authorizer:
+          authorizerUri: 
+            Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CustomAuthorizerFunction.Arn}/invocations
+          authorizerCredentials: 
+            Fn::Sub: ${ApiGatewayAuthorizerRole.Arn}
+          authorizerResultTtlInSeconds: 60
+          type: "token"
     api_key:
       type: apiKey
       name: api_key

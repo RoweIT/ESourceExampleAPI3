@@ -18,8 +18,69 @@ Parameters:
     Default: "1"
     Description: Minor version of the API
     Type: String
+  CognitoUserPoolId:
+    Description: 'User Pool Id for the Cognito User Pool used with the API.'
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: '/esource/cognito/COGNITO_USER_POOL_ID'
+  CognitoClientId:
+    Description: 'Client Id for the Cognito User Pool used with the API.'
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: '/esource/cognito/COGNITO_CLIENT_ID'
 
 Resources:
+  ApiGatewayAuthorizerRole:
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Action:
+          - sts:AssumeRole
+          Effect: Allow
+          Principal:
+            Service:
+            - apigateway.amazonaws.com
+        Version: '2012-10-17'
+      Policies:
+      - PolicyDocument:
+          Statement:
+          - Action:
+            - lambda:InvokeAsync
+            - lambda:InvokeFunction
+            Effect: Allow
+            Resource:
+              Fn::Sub: ${CustomAuthorizerFunction.Arn}
+          Version: '2012-10-17'
+        PolicyName: InvokeAuthorizerFunction
+    Type: AWS::IAM::Role
+
+  CustomAuthorizerFunction:
+    Properties:
+      CodeUri: src/
+      Handler: authorizer.handler
+      Role:
+        Fn::Sub: ${CustomAuthorizerFunctionRole.Arn}
+      Runtime: nodejs8.10
+      Environment:
+        Variables:
+          COGNITO_USER_POOL_ID: !Ref CognitoUserPoolId
+          COGNITO_CLIENT_ID: !Ref CognitoClientId
+    Type: AWS::Serverless::Function
+
+  CustomAuthorizerFunctionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument: 
+        Version: "2012-10-17"
+        Statement: 
+          - 
+            Effect: "Allow"
+            Principal: 
+              Service: 
+                - "lambda.amazonaws.com"
+            Action: 
+              - sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+
   CreateITTFunction:
     Properties:
       CodeUri: src/
