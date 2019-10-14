@@ -158,7 +158,7 @@ Resources:
         'Fn::Transform':
           Name: 'AWS::Include'
           Parameters:
-            Location: './openapi3.yaml'
+            Location: './swagger.yaml'
       Tags:
           Application: ESOURCE_API
           MAJOR_VERSION: !Ref MajorVersion
