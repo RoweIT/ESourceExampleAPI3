@@ -79,7 +79,7 @@ exports.deleteTender = async (event, context) => {
 };
 
 const getAllTenders = () => {
-  return buildResponse(200, tenders, true);
+  return buildResponse(200, tenders);
 };
 
 const getTenderById = id => {
@@ -95,7 +95,7 @@ const getTenderById = id => {
 const buildResponse = (
   statusCode,
   body = {},
-  stringifyBody = false,
+  stringifyBody = true,
   headers = {
     'Access-Control-Allow-Origin': '*'
   }
