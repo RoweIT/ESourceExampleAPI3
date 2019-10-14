@@ -84,7 +84,7 @@ Resources:
   CreateITTFunction:
     Properties:
       CodeUri: src/
-      Handler: app.createITT
+      Handler: integration.createITT
       Runtime: nodejs10.x
     Type: AWS::Serverless::Function
 
@@ -101,7 +101,7 @@ Resources:
   GetTenderStatusFunction:
     Properties:
       CodeUri: src/
-      Handler: app.getTenders
+      Handler: integration.getTenders
       Runtime: nodejs10.x
     Type: AWS::Serverless::Function
 
@@ -118,7 +118,7 @@ Resources:
   GetTenderByIdFunction:
     Properties:
       CodeUri: src/
-      Handler: app.getTenders
+      Handler: integration.getTenders
       Runtime: nodejs10.x
     Type: AWS::Serverless::Function
 
@@ -135,7 +135,7 @@ Resources:
   DeleteTenderFunction:
     Properties:
       CodeUri: src/
-      Handler: app.deleteTender
+      Handler: integration.deleteTender
       Runtime: nodejs10.x
     Type: AWS::Serverless::Function
 

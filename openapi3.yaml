@@ -276,8 +276,8 @@ components:
             Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CustomAuthorizerFunction.Arn}/invocations
           authorizerCredentials: 
             Fn::Sub: ${ApiGatewayAuthorizerRole.Arn}
-          authorizerResultTtlInSeconds: 60
           type: "token"
+          authorizerResultTtlInSeconds: 0
     api_key:
       type: apiKey
       name: api_key
