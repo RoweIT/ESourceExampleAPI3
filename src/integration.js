@@ -85,10 +85,10 @@ const getAllTenders = () => {
 const getTenderById = id => {
   let filteredTenders = tenders.filter(item => item.tender.id === id);
 
-  if (filteredTenders.length > 0) return filteredTenders;
+  if (filteredTenders.length > 0) return buildResponse(200, filteredTenders);
 
   return buildResponse(404, {
-    message: 'Tender not found'
+    message: 'Tender not found.'
   });
 };
 
