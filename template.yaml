@@ -2,12 +2,12 @@ AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: 'api-gateway-test
 
-  Sample SAM Template for api-gateway-test
+  SAM Template for creating esource API
 
   '
 Globals:
   Api:
-    OpenApiVersion: '3.0.1'
+    OpenApiVersion: '3.0.0'
 
 Parameters:
   MajorVersion:
@@ -20,38 +20,72 @@ Parameters:
     Type: String
 
 Resources:
-  GetUsersFunction:
+  CreateITTFunction:
     Properties:
       CodeUri: src/
-      Handler: app.getAllUsers
+      Handler: app.createITT
       Runtime: nodejs10.x
     Type: AWS::Serverless::Function
 
-  GetUsersLambdaPermission:
+  CreateITTLambdaPermission:
     Type: AWS::Lambda::Permission
     DependsOn:
     - ServerlessRestAPI
-    - GetUsersFunction
+    - CreateITTFunction
     Properties:
       Action: lambda:InvokeFunction
-      FunctionName: !Ref GetUsersFunction
+      FunctionName: !Ref CreateITTFunction
       Principal: apigateway.amazonaws.com
 
-  GetUserFunction:
+  GetTenderStatusFunction:
     Properties:
       CodeUri: src/
-      Handler: app.getUser
+      Handler: app.getTenders
       Runtime: nodejs10.x
     Type: AWS::Serverless::Function
 
-  GetUserLambdaPermission:
+  GetTenderStatusLambdaPermission:
     Type: AWS::Lambda::Permission
     DependsOn:
     - ServerlessRestAPI
-    - GetUserFunction
+    - GetTenderStatusFunction
     Properties:
       Action: lambda:InvokeFunction
-      FunctionName: !Ref GetUserFunction
+      FunctionName: !Ref GetTenderStatusFunction
+      Principal: apigateway.amazonaws.com
+
+  GetTenderByIdFunction:
+    Properties:
+      CodeUri: src/
+      Handler: app.getTenders
+      Runtime: nodejs10.x
+    Type: AWS::Serverless::Function
+
+  GetTenderByIdLambdaPermission:
+    Type: AWS::Lambda::Permission
+    DependsOn:
+    - ServerlessRestAPI
+    - GetTenderByIdFunction
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref GetTenderByIdFunction
+      Principal: apigateway.amazonaws.com
+
+  DeleteTenderFunction:
+    Properties:
+      CodeUri: src/
+      Handler: app.deleteTender
+      Runtime: nodejs10.x
+    Type: AWS::Serverless::Function
+
+  DeleteTenderLambdaPermission:
+    Type: AWS::Lambda::Permission
+    DependsOn:
+    - ServerlessRestAPI
+    - DeleteTenderFunction
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref DeleteTenderFunction
       Principal: apigateway.amazonaws.com
 
   ServerlessRestAPI:

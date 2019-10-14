@@ -1,28 +1,28 @@
-let users = [
+let tenders = [
   {
-    id: 1,
-    Name: 'Adam',
-    Admin: true
+    tender: {
+      id: 1
+    }
   },
   {
-    id: 2,
-    Name: 'Paul',
-    Admin: true
+    tender: {
+      id: 2
+    }
   },
   {
-    id: 3,
-    Name: 'Steve',
-    Admin: true
+    tender: {
+      id: 3
+    }
   },
   {
-    id: 4,
-    Name: 'Gary',
-    Admin: true
+    tender: {
+      id: 4
+    }
   },
   {
-    id: 5,
-    Name: 'Tim',
-    Admin: true
+    tender: {
+      id: 5
+    }
   }
 ];
 /**
@@ -38,70 +38,77 @@ let users = [
  *
  */
 
-let responseBody = {
-  apiVersion: 2.1
-};
-
-exports.getAllUsers = async (event, context) => {
+exports.createITT = async (event, context) => {
   try {
-    console.log('Received event:', JSON.stringify(event, null, 2));
-    responseBody.users = getAllUsers();
+    logEvent(event);
 
-    return {
-      statusCode: 200,
-      body: JSON.stringify(responseBody),
-      headers: {
-        'Access-Control-Allow-Origin': '*'
-      }
-    };
+    return buildResponse(201, {
+      message: 'Invitation to tender created successfully.'
+    });
   } catch (err) {
-    return {
-      statusCode: 401,
-      body: {
-        message: err.message
-      },
-      headers: {
-        'Access-Control-Allow-Origin': '*'
-      }
-    };
+    return buildResponse(401, {
+      message: err.message
+    });
   }
 };
 
-exports.getUser = async (event, context) => {
+exports.getTenders = async (event, context) => {
   try {
-    console.log('Received event:', JSON.stringify(event, null, 2));
-    responseBody.user = getUser(parseInt(event.pathParameters.id));
+    logEvent(event);
 
-    return {
-      statusCode: 200,
-      body: JSON.stringify(responseBody),
-      headers: {
-        'Access-Control-Allow-Origin': '*'
-      }
-    };
+    return event.pathParameters && event.pathParameters.id
+      ? getTenderById(parseInt(event.pathParameters.id))
+      : getAllTenders();
   } catch (err) {
-    return {
-      statusCode: 401,
-      body: {
-        message: err.message
-      },
-      headers: {
-        'Access-Control-Allow-Origin': '*'
-      }
-    };
+    return buildResponse(401, {
+      message: err.message
+    });
   }
 };
 
-const getAllUsers = () => {
-  return users;
+exports.deleteTender = async (event, context) => {
+  try {
+    logEvent(event);
+
+    return buildResponse(204);
+  } catch (err) {
+    return buildResponse(401, {
+      message: err.message
+    });
+  }
 };
 
-const getUser = id => {
-  let filteredUsers = users.filter(user => user.id === id);
+const getAllTenders = () => {
+  return buildResponse(200, tenders, true);
+};
 
-  if (filteredUsers.length > 0) return filteredUsers;
+const getTenderById = id => {
+  let filteredTenders = tenders.filter(item => item.tender.id === id);
+
+  if (filteredTenders.length > 0) return filteredTenders;
+
+  return buildResponse(404, {
+    message: 'Tender not found'
+  });
+};
+
+const buildResponse = (
+  statusCode,
+  body = {},
+  stringifyBody = false,
+  headers = {
+    'Access-Control-Allow-Origin': '*'
+  }
+) => {
+  if (stringifyBody) body = JSON.stringify(body);
 
   return {
-    message: 'User not found!'
+    statusCode,
+    body,
+    headers
   };
+};
+
+const logEvent = event => {
+  console.log('Received event:', JSON.stringify(event, null, 2));
 };
