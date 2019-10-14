@@ -267,7 +267,7 @@ components:
           type: string
   securitySchemes:
     CustomAuthorizer:
-        type: "basic"
+        type: "apiKey"
         name: "Authorization"
         in: "header"
         x-amazon-apigateway-authtype: "custom"
